@@ -19,7 +19,6 @@ import app.carsharing.model.Payment;
 import app.carsharing.model.Rental;
 import app.carsharing.model.Role;
 import app.carsharing.model.User;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
@@ -171,17 +170,6 @@ public class EntityAndDtoMaker {
         dto.setActualReturnDate(LocalDate.now().plusDays(1));
         dto.setCarId(ID_1L_CORRECT);
         dto.setUserId(ID_1L_CORRECT);
-
-        return dto;
-    }
-
-    public static RentalDto createRentalDto25L() {
-        RentalDto dto = new RentalDto();
-        dto.setCarId(25L);
-        dto.setUserId(25L);
-        dto.setRentalDate(LocalDate.of(2024, 11, 25));
-        dto.setReturnDate(LocalDate.of(2024, 11, 30));
-        dto.setActualReturnDate(LocalDate.of(2024, 11, 30));
 
         return dto;
     }

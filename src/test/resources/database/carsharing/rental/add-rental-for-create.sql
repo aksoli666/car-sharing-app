@@ -1,1 +1,0 @@
-INSERT INTO rentals (id, rental_date, return_date, actual_return_date, car_id, user_id) VALUES (25, '2024-11-25', '2024-11-30', '2024-11-30', 25, 25);
