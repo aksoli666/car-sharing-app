@@ -16,8 +16,10 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -26,7 +28,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Getter
 @Setter
 @SQLDelete(sql = "UPDATE users SET is_deleted=true WHERE id=?")
-@Where(clause = "is_deleted=false")
+@SQLRestriction(value = "is_deleted=false")
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -81,5 +83,34 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return !isDeleted;
+    }
+
+    @Override
+    public int hashCode() {
+        HashCodeBuilder hcb = new HashCodeBuilder()
+                .append(email)
+                .append(firstName)
+                .append(lastName)
+                .append(password)
+                .append(telegramChatId);
+        return hcb.toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof User)) {
+            return false;
+        }
+        User that = (User) o;
+        EqualsBuilder eb = new EqualsBuilder()
+                .append(email, that.email)
+                .append(firstName, that.firstName)
+                .append(lastName, that.lastName)
+                .append(password, that.password)
+                .append(telegramChatId, that.telegramChatId);
+        return eb.isEquals();
     }
 }

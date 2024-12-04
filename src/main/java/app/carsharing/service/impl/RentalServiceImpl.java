@@ -1,8 +1,5 @@
 package app.carsharing.service.impl;
 
-import static app.carsharing.security.CustomUserDetailsService.getUserFromAuthentication;
-import static app.carsharing.security.CustomUserDetailsService.getUserIdFromAuthentication;
-
 import app.carsharing.dto.RentalDto;
 import app.carsharing.dto.request.RentalAddRequestDto;
 import app.carsharing.dto.responce.RentalAddResponseDto;
@@ -17,6 +14,7 @@ import app.carsharing.model.User;
 import app.carsharing.notification.NotificationService;
 import app.carsharing.repository.CarRepository;
 import app.carsharing.repository.RentalRepository;
+import app.carsharing.security.CustomUserDetailsService;
 import app.carsharing.service.RentalService;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class RentalServiceImpl implements RentalService {
+    private final CustomUserDetailsService userDetailsService;
     private final NotificationService notificationService;
     private final RentalRepository rentalRepository;
     private final CarRepository carRepository;
@@ -41,7 +40,7 @@ public class RentalServiceImpl implements RentalService {
         Long carId = dto.getCarId();
         Car car = carRepository.findById(carId).orElseThrow(
                 () -> new EntityNotFoundException("Car not found by id: " + carId));
-        User current = getUserFromAuthentication(authentication);
+        User current = userDetailsService.getUserFromAuthentication(authentication);
         Rental rental = rentalMapper.toRental(dto);
         rental.setUser(current);
         rental.setCar(car);
@@ -55,18 +54,18 @@ public class RentalServiceImpl implements RentalService {
     public Page<RentalDto> rentalHistory(Authentication authentication,
                                          boolean isActive,
                                          Pageable pageable) {
-        Long userId = getUserIdFromAuthentication(authentication);
+        Long userId = userDetailsService.getUserIdFromAuthentication(authentication);
         Page<Rental> rentals = isActive
                 ? rentalRepository.findByUserIdAndActualReturnDateIsNull(userId, pageable)
                 : rentalRepository.findByUserIdAndActualReturnDateIsNotNull(userId, pageable);
-        return rentalMapper.toRentalDtoList(rentals);
+        return rentalMapper.toRentalDtoPage(rentals);
     }
 
     @Override
     public RentalDto getById(Authentication authentication, Long id) {
-        Long userId = getUserIdFromAuthentication(authentication);
+        Long userId = userDetailsService.getUserIdFromAuthentication(authentication);
         Rental rental = rentalRepository.findByIdAndUserId(id, userId).orElseThrow(
-                () -> new RuntimeException("Rental not found by id: " + id));
+                () -> new EntityNotFoundException("Rental not found by id: " + id));
         return rentalMapper.toRentalDto(rental);
     }
 
@@ -75,7 +74,7 @@ public class RentalServiceImpl implements RentalService {
     public RentalDto setActualReturnDate(Long id, LocalDate actualReturnDate)
             throws NotificationException {
         Rental rental = rentalRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Rental not found by id: " + id));
+                () -> new EntityNotFoundException("Rental not found by id: " + id));
         if (rental.getActualReturnDate() != null) {
             throw new RentalAlreadyReturnedException("Rental already returned");
         }

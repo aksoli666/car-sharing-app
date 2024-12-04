@@ -1,7 +1,5 @@
 package app.carsharing.service.impl;
 
-import static app.carsharing.security.CustomUserDetailsService.getUserIdFromAuthentication;
-
 import app.carsharing.dto.PaymentDto;
 import app.carsharing.dto.request.PaymentRequestDto;
 import app.carsharing.dto.responce.PaymentResponseDto;
@@ -13,6 +11,7 @@ import app.carsharing.model.Rental;
 import app.carsharing.notification.NotificationService;
 import app.carsharing.repository.PaymentRepository;
 import app.carsharing.repository.RentalRepository;
+import app.carsharing.security.CustomUserDetailsService;
 import app.carsharing.service.PaymentService;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
@@ -33,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PaymentServiceImpl implements PaymentService {
     private static final String currency = "usd";
 
+    private final CustomUserDetailsService customUserDetailsService;
     private final NotificationService notificationService;
     private final PaymentRepository paymentRepository;
     private final RentalRepository rentalRepository;
@@ -54,8 +54,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Page<PaymentDto> getPayments(Authentication authentication, Pageable pageable) {
-        Long userId = getUserIdFromAuthentication(authentication);
-        Page<Payment> payments = paymentRepository.findByRentalUserId(userId, pageable);
+        Long userId = customUserDetailsService.getUserIdFromAuthentication(authentication);
+        Page<Payment> payments = paymentRepository.findByRentalUserIdFetchRental(userId, pageable);
         return paymentMapper.toPaymentDtoPage(payments);
     }
 
@@ -63,7 +63,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public PaymentResponseDto createPaymentSession(Authentication authentication,
                                                    PaymentRequestDto dto) {
-        Long userId = getUserIdFromAuthentication(authentication);
+        Long userId = customUserDetailsService.getUserIdFromAuthentication(authentication);
         Rental rental = rentalRepository.findByIdAndUserId(dto.rentalId(), userId).orElseThrow(
                 () -> new EntityNotFoundException("Rental don`t found by userId: " + userId));
 

@@ -1,0 +1,1 @@
+DELETE FROM cars WHERE id IN (11, 12);

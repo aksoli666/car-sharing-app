@@ -10,6 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.security.core.GrantedAuthority;
 
 @Entity
@@ -32,5 +34,26 @@ public class Role implements GrantedAuthority {
     public enum RoleName {
         ROLE_MANAGER,
         ROLE_CUSTOMER
+    }
+
+    @Override
+    public int hashCode() {
+        HashCodeBuilder hcb = new HashCodeBuilder()
+                .append(role);
+        return hcb.toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Role)) {
+            return false;
+        }
+        Role that = (Role) o;
+        EqualsBuilder eb = new EqualsBuilder()
+                .append(role, that.role);
+        return eb.isEquals();
     }
 }

@@ -8,11 +8,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.URL;
 
 @Entity
@@ -30,7 +33,8 @@ public class Payment {
     @Column(nullable = false)
     private Type type;
     @OneToOne
-    @JoinColumn(name = "rental_id", nullable = false)
+    @MapsId
+    @JoinColumn(name = "id", nullable = false)
     private Rental rental;
     @Column(nullable = false, unique = true)
     @URL
@@ -48,5 +52,36 @@ public class Payment {
     public enum Type {
         PAYMENT,
         FINE
+    }
+
+    @Override
+    public int hashCode() {
+        HashCodeBuilder hcb = new HashCodeBuilder()
+                .append(status)
+                .append(type)
+                .append(rental)
+                .append(sessionUrl)
+                .append(sessionId)
+                .append(amount);
+        return hcb.toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Payment)) {
+            return false;
+        }
+        Payment that = (Payment) o;
+        EqualsBuilder eb = new EqualsBuilder()
+                .append(status, that.status)
+                .append(type, that.type)
+                .append(rental, that.rental)
+                .append(sessionUrl, that.sessionUrl)
+                .append(sessionId, that.sessionId)
+                .append(amount, that.amount);
+        return eb.isEquals();
     }
 }

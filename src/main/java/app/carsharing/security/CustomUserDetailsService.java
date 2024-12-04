@@ -21,12 +21,15 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new EntityNotFoundException("User " + email + " not found"));
     }
 
-    public static Long getUserIdFromAuthentication(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        return user.getId();
+    public User getUserFromAuthentication(Authentication authentication) {
+        String email = ((org.springframework.security.core.userdetails.User)
+                authentication.getPrincipal()).getUsername();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User " + email + " not found"));
     }
 
-    public static User getUserFromAuthentication(Authentication authentication) {
-        return (User) authentication.getPrincipal();
+    public Long getUserIdFromAuthentication(Authentication authentication) {
+        User user = getUserFromAuthentication(authentication);
+        return user.getId();
     }
 }

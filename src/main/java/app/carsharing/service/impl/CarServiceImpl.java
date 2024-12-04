@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,11 +18,11 @@ public class CarServiceImpl implements CarService {
     private final CarRepository carRepository;
     private final CarMapper carMapper;
 
+    @Transactional
     @Override
     public CarDto create(CarDto dto) {
-        return carMapper.toCarDto(
-                carRepository.save(
-                        carMapper.toCar(dto)));
+        Car car = carMapper.toCar(dto);
+        return carMapper.toCarDto(carRepository.save(car));
     }
 
     @Override
@@ -36,6 +37,7 @@ public class CarServiceImpl implements CarService {
         return carMapper.toCarDtoPage(carRepository.findAll(pageable));
     }
 
+    @Transactional
     @Override
     public CarDto update(Long id, CarDto dto) {
         Car car = carRepository.findById(id).orElseThrow(() ->
@@ -44,6 +46,7 @@ public class CarServiceImpl implements CarService {
         return carMapper.toCarDto(carRepository.save(car));
     }
 
+    @Transactional
     @Override
     public void delete(Long id) {
         carRepository.deleteById(id);

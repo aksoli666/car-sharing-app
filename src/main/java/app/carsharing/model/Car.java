@@ -11,15 +11,17 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "cars")
 @Getter
 @Setter
 @SQLDelete(sql = "UPDATE cars SET is_deleted=true WHERE id=?")
-@Where(clause = "is_deleted=false")
+@SQLRestriction(value = "is_deleted=false")
 public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,5 +45,34 @@ public class Car {
         SUV,
         HATCHBACK,
         UNIVERSAL
+    }
+
+    @Override
+    public int hashCode() {
+        HashCodeBuilder hcb = new HashCodeBuilder()
+                .append(model)
+                .append(brand)
+                .append(type)
+                .append(inventory)
+                .append(daileFee);
+        return hcb.toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Car)) {
+            return false;
+        }
+        Car that = (Car) o;
+        EqualsBuilder eb = new EqualsBuilder()
+                .append(model, that.model)
+                .append(brand, that.brand)
+                .append(type, that.type)
+                .append(inventory, that.inventory)
+                .append(daileFee, that.daileFee);
+        return eb.isEquals();
     }
 }

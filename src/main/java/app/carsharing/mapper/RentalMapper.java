@@ -25,10 +25,10 @@ public interface RentalMapper {
 
     @Mapping(source = "car.id", target = "carId")
     @Mapping(source = "user.id", target = "userId")
-    List<RentalDto> toRentalDtoList(List<Rental> rentals);
+    List<RentalDto> toRentalDtoPage(List<Rental> rentals);
 
-    default Page<RentalDto> toRentalDtoList(Page<Rental> rentals) {
-        List<RentalDto> rentalDtoList = toRentalDtoList(rentals.getContent());
+    default Page<RentalDto> toRentalDtoPage(Page<Rental> rentals) {
+        List<RentalDto> rentalDtoList = toRentalDtoPage(rentals.getContent());
         return new PageImpl<>(rentalDtoList, rentals.getPageable(), rentals.getTotalElements());
     }
 }

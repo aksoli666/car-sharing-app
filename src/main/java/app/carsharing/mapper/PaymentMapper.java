@@ -17,7 +17,6 @@ public interface PaymentMapper {
 
     PaymentResponseDto toPaymentResponseDto(Payment payment);
 
-    @Mapping(source = "rental.id", target = "rentalId")
     List<PaymentDto> toPaymentDtoList(List<Payment> payments);
 
     default Page<PaymentDto> toPaymentDtoPage(Page<Payment> payments) {

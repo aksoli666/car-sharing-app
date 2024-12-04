@@ -89,7 +89,7 @@ public class CarController {
     )
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public void delete(@Positive @PathVariable Long id) {
         carService.delete(id);
     }
