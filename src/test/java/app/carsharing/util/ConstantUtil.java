@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 public class ConstantUtil {
     public static final Long ID_1L_CORRECT = 1L;
     public static final Long ID_10L_CORRECT = 10L;
-    public static final Long ID_14L_CORRECT = 14L;
+    public static final Long ID_11L_CORRECT = 11L;
     public static final Long ID_30L_CORRECT = 30L;
     public static final Long ID_41L_CORRECT = 41L;
     public static final Long ID_42L_CORRECT = 42L;
@@ -32,18 +32,12 @@ public class ConstantUtil {
 
     public static final String ADD_CARS_SQL =
             "classpath:database/carsharing/car/add-cars.sql";
-    public static final String DELETE_CARS_SQL =
-            "classpath:database/carsharing/car/delete-cars.sql";
-    public static final String ADD_CAR_FOR_CREATE_SQL =
-            "classpath:database/carsharing/car/add-car-for-create.sql";
     public static final String ADD_CAR_SQL =
             "classpath:database/carsharing/car/add-car.sql";
     public static final String UPDATE_CAR_SQL =
             "classpath:database/carsharing/car/update-car.sql";
     public static final String DELETE_UPD_CAR_SQL =
             "classpath:database/carsharing/car/delete-upd-car.sql";
-    public static final String ADD_CAR_FOR_DELETE_BY_ID_SQL =
-            "classpath:database/carsharing/car/add-car-for-delete-by-id.sql";
     public static final String DELETE_RENTAL_CAR_SQL =
             "classpath:database/carsharing/car/delete-rental-car.sql";
 
@@ -58,6 +52,10 @@ public class ConstantUtil {
     public static final String DELETE_USER_SQL =
             "classpath:database/carsharing/user/delete-user.sql";
 
+    public static final String ADD_CAR_FOR_PAYMENT_SQL =
+            "classpath:database/carsharing/car/add-car-for-payment.sql";
+    public static final String ADD_USER_FOR_PAYMENT_SQL =
+            "classpath:database/carsharing/user/add-user-for-payment.sql";
     public static final String ADD_RENTAL_FOR_PAYMENT_SQL =
             "classpath:database/carsharing/rental/add-rental-for-payment.sql";
     public static final String ADD_PAYMENT_SQL =

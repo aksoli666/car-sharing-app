@@ -42,16 +42,20 @@ public class CarServiceTest {
             Verify #create(), return CarDto
             """)
     public void create_validCarDto_returnCarDto() {
-        CarDto dto = createCarDto();
+        CarDto expected = createCarDto();
         Car car = createCar1L();
 
-        when(carMapper.toCar(dto)).thenReturn(car);
+        when(carMapper.toCar(expected)).thenReturn(car);
         when(carRepository.save(car)).thenReturn(car);
-        when(carMapper.toCarDto(car)).thenReturn(dto);
+        when(carMapper.toCarDto(car)).thenReturn(expected);
 
-        CarDto actual = carService.create(dto);
+        CarDto actual = carService.create(expected);
 
-        assertEquals(dto, actual);
+        assertEquals(expected, actual);
+
+        verify(carMapper).toCar(expected);
+        verify(carRepository).save(car);
+        verify(carMapper).toCarDto(car);
     }
 
     @Test
@@ -59,9 +63,8 @@ public class CarServiceTest {
             Verify #getById(), return CarDto
             """)
     public void getById_validId_returnCarDto() {
-        Car car = createCar1L();
-
         CarDto expected = createCarDto();
+        Car car = createCar1L();
 
         when(carRepository.findById(ID_1L_CORRECT)).thenReturn(Optional.of(car));
         when(carMapper.toCarDto(car)).thenReturn(expected);
@@ -69,6 +72,9 @@ public class CarServiceTest {
         CarDto actual = carService.getById(ID_1L_CORRECT);
 
         assertEquals(expected, actual);
+
+        verify(carRepository).findById(ID_1L_CORRECT);
+        verify(carMapper).toCarDto(car);
     }
 
     @Test
@@ -77,8 +83,11 @@ public class CarServiceTest {
             """)
     public void getById_invalidId_throwEntityNotFoundException() {
         when(carRepository.findById(INCORRECT_ID)).thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class,
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> carService.getById(INCORRECT_ID));
+
+        assertEquals("Car not found by id: " + INCORRECT_ID, exception.getMessage());
     }
 
     @Test
@@ -99,6 +108,9 @@ public class CarServiceTest {
         Page<CarDto> actual = carService.getAll(pageable);
 
         assertEquals(expected, actual);
+
+        verify(carRepository).findAll(pageable);
+        verify(carMapper).toCarDtoPage(cars);
     }
 
     @Test
@@ -117,6 +129,10 @@ public class CarServiceTest {
         CarDto actual = carService.update(car.getId(), expected);
 
         assertEquals(expected, actual);
+
+        verify(carRepository).findById(ID_1L_CORRECT);
+        verify(carRepository).save(car);
+        verify(carMapper).toCarDto(car);
     }
 
     @Test
@@ -125,8 +141,11 @@ public class CarServiceTest {
             """)
     public void update_invalidId_throwEntityNotFoundException() {
         when(carRepository.findById(INCORRECT_ID)).thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class,
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> carService.update(INCORRECT_ID, null));
+
+        assertEquals("Car not found by id: " + INCORRECT_ID, exception.getMessage());
     }
 
     @Test

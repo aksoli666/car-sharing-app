@@ -15,6 +15,7 @@ import static app.carsharing.util.EntityAndDtoMaker.createRentalDtoNotActive;
 import static app.carsharing.util.EntityAndDtoMaker.createUser1L;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import app.carsharing.dto.RentalDto;
@@ -83,6 +84,12 @@ public class RentalServiceTest {
         RentalAddResponseDto actual = rentalService.addRental(authentication, dto);
 
         assertEquals(expected, actual);
+
+        verify(carRepository).findById(car.getId());
+        verify(customUserDetailsService).getUserFromAuthentication(authentication);
+        verify(rentalMapper).toRental(dto);
+        verify(rentalRepository).save(rental);
+        verify(rentalMapper).toRentalAddResponseDto(rental);
     }
 
     @Test
@@ -93,10 +100,10 @@ public class RentalServiceTest {
         RentalAddRequestDto dto = createRentalAddRequestDto();
         dto.setCarId(INCORRECT_ID);
 
-        when(carRepository.findById(INCORRECT_ID)).thenReturn(Optional.empty());
-
-        assertThrows(EntityNotFoundException.class,
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> rentalService.addRental(authentication, dto));
+
+        assertEquals("Car not found by id: " + INCORRECT_ID, exception.getMessage());
     }
 
     @Test
@@ -121,6 +128,10 @@ public class RentalServiceTest {
 
         assertEquals(expected, actual);
 
+        verify(customUserDetailsService).getUserIdFromAuthentication(authentication);
+        verify(rentalRepository).findByUserIdAndActualReturnDateIsNull(ID_1L_CORRECT, pageable);
+        verify(rentalMapper).toRentalDtoPage(rentals);
+
     }
 
     @Test
@@ -144,6 +155,10 @@ public class RentalServiceTest {
         Page<RentalDto> actual = rentalService.rentalHistory(authentication, NOT_ACTIVE, pageable);
 
         assertEquals(expected, actual);
+
+        verify(customUserDetailsService).getUserIdFromAuthentication(authentication);
+        verify(rentalRepository).findByUserIdAndActualReturnDateIsNotNull(ID_1L_CORRECT, pageable);
+        verify(rentalMapper).toRentalDtoPage(rentals);
     }
 
     @Test
@@ -164,6 +179,10 @@ public class RentalServiceTest {
         RentalDto actual = rentalService.getById(authentication, ID_1L_CORRECT);
 
         assertEquals(expected, actual);
+
+        verify(customUserDetailsService).getUserIdFromAuthentication(authentication);
+        verify(rentalRepository).findByIdAndUserId(ID_1L_CORRECT, ID_1L_CORRECT);
+        verify(rentalMapper).toRentalDto(rental);
     }
 
     @Test
@@ -177,8 +196,10 @@ public class RentalServiceTest {
         when(rentalRepository.findByIdAndUserId(INCORRECT_ID, ID_1L_CORRECT))
                 .thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class,
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> rentalService.getById(authentication, INCORRECT_ID));
+
+        assertEquals("Rental not found by id: " + INCORRECT_ID, exception.getMessage());
     }
 
     @Test
@@ -200,6 +221,10 @@ public class RentalServiceTest {
                 .setActualReturnDate(ID_1L_CORRECT, LocalDate.now().plusDays(1));
 
         assertEquals(expected, actual);
+
+        verify(rentalRepository).findById(ID_1L_CORRECT);
+        verify(rentalRepository).save(rental);
+        verify(rentalMapper).toRentalDto(rental);
     }
 
     @Test
@@ -212,5 +237,10 @@ public class RentalServiceTest {
         assertThrows(EntityNotFoundException.class,
                 () -> rentalService.setActualReturnDate(
                         INCORRECT_ID, LocalDate.now().plusDays(1)));
+
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> rentalService.setActualReturnDate(INCORRECT_ID, LocalDate.now().plusDays(1)));
+
+        assertEquals("Rental not found by id: " + INCORRECT_ID, exception.getMessage());
     }
 }

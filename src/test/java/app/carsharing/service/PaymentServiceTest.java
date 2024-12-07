@@ -78,6 +78,9 @@ public class PaymentServiceTest {
         PaymentDto actual = paymentService.getById(ID_1L_CORRECT);
 
         assertEquals(expected, actual);
+
+        verify(paymentRepository).findById(ID_1L_CORRECT);
+        verify(paymentMapper).toPaymentDto(payment);
     }
 
     @Test
@@ -87,8 +90,10 @@ public class PaymentServiceTest {
     public void findById_invalidId_throwEntityNotFoundException() {
         when(paymentRepository.findById(INCORRECT_ID)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class,
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> paymentService.getById(INCORRECT_ID));
+
+        assertEquals("Payment don`t found by id: " + INCORRECT_ID, exception.getMessage());
     }
 
     @Test
@@ -111,6 +116,10 @@ public class PaymentServiceTest {
         Page<PaymentDto> actual = paymentService.getPayments(authentication, pageable);
 
         assertEquals(expected, actual);
+
+        verify(customUserDetailsService).getUserIdFromAuthentication(authentication);
+        verify(paymentRepository).findByRentalUserIdFetchRental(ID_1L_CORRECT, pageable);
+        verify(paymentMapper).toPaymentDtoPage(payments);
     }
 
     @Test

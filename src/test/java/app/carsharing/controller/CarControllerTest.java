@@ -1,14 +1,11 @@
 package app.carsharing.controller;
 
 import static app.carsharing.util.ConstantUtil.ADD_CARS_SQL;
-import static app.carsharing.util.ConstantUtil.ADD_CAR_FOR_CREATE_SQL;
-import static app.carsharing.util.ConstantUtil.ADD_CAR_FOR_DELETE_BY_ID_SQL;
 import static app.carsharing.util.ConstantUtil.ADD_CAR_SQL;
 import static app.carsharing.util.ConstantUtil.COUNT_CONTENT_2;
-import static app.carsharing.util.ConstantUtil.DELETE_CARS_SQL;
 import static app.carsharing.util.ConstantUtil.DELETE_UPD_CAR_SQL;
 import static app.carsharing.util.ConstantUtil.ID_10L_CORRECT;
-import static app.carsharing.util.ConstantUtil.ID_14L_CORRECT;
+import static app.carsharing.util.ConstantUtil.ID_11L_CORRECT;
 import static app.carsharing.util.ConstantUtil.UPDATE_CAR_SQL;
 import static app.carsharing.util.ConstantUtil.URL_CARS_WITHOUT_ID;
 import static app.carsharing.util.ConstantUtil.URL_CARS_WITH_ID;
@@ -16,7 +13,7 @@ import static app.carsharing.util.ConstantUtil.pageable;
 import static app.carsharing.util.EntityAndDtoMaker.createCarDto10L;
 import static app.carsharing.util.EntityAndDtoMaker.createCarDto11L;
 import static app.carsharing.util.EntityAndDtoMaker.createCarDto12L;
-import static app.carsharing.util.EntityAndDtoMaker.createCarDto13L;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testcontainers.shaded.org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 
 import app.carsharing.dto.CarDto;
@@ -46,12 +43,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @Sql(
-        scripts = ADD_CARS_SQL,
+        scripts = {ADD_CARS_SQL, ADD_CAR_SQL},
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
-)
-@Sql(
-        scripts = DELETE_CARS_SQL,
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_CLASS
 )
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class CarControllerTest {
@@ -89,13 +82,9 @@ public class CarControllerTest {
 
     @WithMockUser(username = "manager", roles = "MANAGER")
     @Test
-    @Sql(
-            scripts = ADD_CAR_FOR_CREATE_SQL,
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-    )
     @DisplayName("Create a new car")
     public void createCar_validDto_success() throws Exception {
-        CarDto expected = createCarDto13L();
+        CarDto expected = createCarDto10L();
 
         String json = objectMapper.writeValueAsString(expected);
 
@@ -110,15 +99,11 @@ public class CarControllerTest {
         CarDto actual = objectMapper.readValue(
                 result.getResponse().getContentAsString(), CarDto.class);
 
-        reflectionEquals(expected, actual);
+        assertTrue(reflectionEquals(expected, actual));
     }
 
     @WithMockUser(username = "customer", roles = "CUSTOMER")
     @Test
-    @Sql(
-            scripts = ADD_CAR_SQL,
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-    )
     @DisplayName("Get car by id")
     public void getCarById_validId_success() throws Exception {
         CarDto expected = createCarDto10L();
@@ -132,7 +117,7 @@ public class CarControllerTest {
         CarDto actual = objectMapper.readValue(
                 result.getResponse().getContentAsString(), CarDto.class);
 
-        reflectionEquals(expected, actual);
+        assertTrue(reflectionEquals(expected, actual));
     }
 
     @WithMockUser(username = "customer", roles = "CUSTOMER")
@@ -186,19 +171,15 @@ public class CarControllerTest {
         CarDto actual = objectMapper.readValue(
                 result.getResponse().getContentAsString(), CarDto.class);
 
-        reflectionEquals(expected, actual);
+        assertTrue(reflectionEquals(expected, actual));
     }
 
     @WithMockUser(username = "manager", roles = "MANAGER")
     @Test
-    @Sql(
-            scripts = ADD_CAR_FOR_DELETE_BY_ID_SQL,
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-    )
     @DisplayName("Delete car by id")
     public void delete_validId_noContent() throws Exception {
         mockMvc.perform(
-                MockMvcRequestBuilders.delete(URL_CARS_WITH_ID, ID_14L_CORRECT)
+                MockMvcRequestBuilders.delete(URL_CARS_WITH_ID, ID_11L_CORRECT)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
     }

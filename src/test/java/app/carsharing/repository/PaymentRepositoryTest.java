@@ -1,6 +1,8 @@
 package app.carsharing.repository;
 
-import static app.carsharing.util.ConstantUtil.*;
+import static app.carsharing.util.ConstantUtil.COUNT_CONTENT_1;
+import static app.carsharing.util.ConstantUtil.ID_41L_CORRECT;
+import static app.carsharing.util.ConstantUtil.pageable;
 import static app.carsharing.util.EntityAndDtoMaker.createCar1L;
 import static app.carsharing.util.EntityAndDtoMaker.createPayment;
 import static app.carsharing.util.EntityAndDtoMaker.createRental;

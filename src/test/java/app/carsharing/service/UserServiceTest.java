@@ -64,7 +64,9 @@ public class UserServiceTest {
         userService.updateRole(authentication, ROLE_CUSTOMER);
 
         assertTrue(user.getRoles().contains(role));
-        verify(userRepository).save(user);
+
+        verify(customUserDetailsService).getUserFromAuthentication(authentication);
+        verify(roleRepository).findByRole(Role.RoleName.ROLE_CUSTOMER);
     }
 
     @Test
@@ -77,8 +79,10 @@ public class UserServiceTest {
         when(customUserDetailsService.getUserFromAuthentication(authentication)).thenReturn(user);
         when(roleRepository.findByRole(Role.RoleName.ROLE_CUSTOMER)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class,
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> userService.updateRole(authentication, ROLE_CUSTOMER));
+
+        assertEquals("Role not found: " + ROLE_CUSTOMER, exception.getMessage());
     }
 
     @Test
@@ -88,8 +92,9 @@ public class UserServiceTest {
 
         when(customUserDetailsService.getUserFromAuthentication(authentication)).thenReturn(user);
 
-        assertThrows(IllegalArgumentException.class,
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> userService.updateRole(authentication, "INVALID_ROLE"));
+        assertEquals("Invalid role name: INVALID_ROLE", exception.getMessage());
     }
 
 
@@ -106,8 +111,13 @@ public class UserServiceTest {
         when(customUserDetailsService.getUserFromAuthentication(authentication)).thenReturn(user);
         when(roleRepository.findByRole(Role.RoleName.ROLE_CUSTOMER)).thenReturn(Optional.of(role));
 
-        assertThrows(DuplicateRoleException.class,
+        DuplicateRoleException exception = assertThrows(DuplicateRoleException.class,
                 () -> userService.updateRole(authentication, ROLE_CUSTOMER));
+
+        assertEquals("Role already exists: " + ROLE_CUSTOMER, exception.getMessage());
+
+        verify(customUserDetailsService).getUserFromAuthentication(authentication);
+        verify(roleRepository).findByRole(Role.RoleName.ROLE_CUSTOMER);
     }
 
     @Test
@@ -125,6 +135,9 @@ public class UserServiceTest {
         UserDto actual = userService.getProfile(authentication);
 
         assertEquals(expected, actual);
+
+        verify(customUserDetailsService).getUserFromAuthentication(authentication);
+        verify(userMapper).toUserDto(user);
     }
 
     @Test
@@ -142,6 +155,8 @@ public class UserServiceTest {
         userService.updateProfile(authentication, dto);
 
         assertTrue(user.getFirstName().equals(dto.getFirstName()));
-        verify(userRepository).save(user);
+
+        verify(customUserDetailsService).getUserFromAuthentication(authentication);
+        verify(userMapper).updateUser(dto, user);
     }
 }

@@ -80,17 +80,6 @@ public class EntityAndDtoMaker {
         return dto;
     }
 
-    public static CarDto createCarDto13L() {
-        CarDto dto = new CarDto();
-        dto.setModel("model13");
-        dto.setBrand("brand13");
-        dto.setType("UNIVERSAL");
-        dto.setInventory(5);
-        dto.setDaileFee(BigDecimal.valueOf(50.99));
-
-        return dto;
-    }
-
     public static User createUser1L() {
         Role role = new Role();
         role.setId(ID_1L_CORRECT);

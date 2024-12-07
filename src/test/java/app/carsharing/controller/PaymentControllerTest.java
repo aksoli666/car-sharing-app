@@ -1,15 +1,16 @@
 package app.carsharing.controller;
 
-import static app.carsharing.util.ConstantUtil.ADD_CAR_FOR_RENTAL_SQL;
+import static app.carsharing.util.ConstantUtil.ADD_CAR_FOR_PAYMENT_SQL;
 import static app.carsharing.util.ConstantUtil.ADD_PAYMENT_SQL;
 import static app.carsharing.util.ConstantUtil.ADD_RENTAL_FOR_PAYMENT_SQL;
-import static app.carsharing.util.ConstantUtil.ADD_USER_FOR_RENTAL_SQL;
+import static app.carsharing.util.ConstantUtil.ADD_USER_FOR_PAYMENT_SQL;
 import static app.carsharing.util.ConstantUtil.COUNT_CONTENT_1;
 import static app.carsharing.util.ConstantUtil.ID_40L_CORRECT;
 import static app.carsharing.util.ConstantUtil.URL_PAYMENTS_WITHOUT_ID;
 import static app.carsharing.util.ConstantUtil.URL_PAYMENTS_WITH_ID;
 import static app.carsharing.util.ConstantUtil.pageable;
 import static app.carsharing.util.EntityAndDtoMaker.createPaymentDto40L;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testcontainers.shaded.org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 
 import app.carsharing.dto.PaymentDto;
@@ -38,8 +39,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @Sql(
-       scripts = {ADD_CAR_FOR_RENTAL_SQL,
-               ADD_USER_FOR_RENTAL_SQL,
+       scripts = {ADD_CAR_FOR_PAYMENT_SQL,
+               ADD_USER_FOR_PAYMENT_SQL,
                ADD_RENTAL_FOR_PAYMENT_SQL,
                ADD_PAYMENT_SQL},
        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
@@ -78,7 +79,7 @@ public class PaymentControllerTest {
         }
     }
 
-    @WithMockUser(username = "email25@gmail.com", roles = "MANAGER")
+    @WithMockUser(username = "email26@gmail.com", roles = "MANAGER")
     @Test
     @DisplayName("Get payment by id")
     public void getById_validId_returnPaymentDto() throws Exception {
@@ -93,10 +94,10 @@ public class PaymentControllerTest {
         PaymentDto actual = objectMapper.readValue(
                 result.getResponse().getContentAsString(), PaymentDto.class);
 
-        reflectionEquals(expected, actual);
+        assertTrue(reflectionEquals(expected, actual));
     }
 
-    @WithMockUser(username = "email25@gmail.com", roles = "CUSTOMER")
+    @WithMockUser(username = "email26@gmail.com", roles = "CUSTOMER")
     @Test
     @DisplayName("Get payments")
     public void getPayments_validAuthentication_success() throws Exception {
