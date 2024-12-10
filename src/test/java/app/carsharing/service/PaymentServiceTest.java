@@ -69,16 +69,13 @@ public class PaymentServiceTest {
             """)
     public void getById_validId_returnPaymentDto() {
         Payment payment = createPayment();
-
         PaymentDto expected = createPaymentDto();
 
         when(paymentRepository.findById(ID_1L_CORRECT)).thenReturn(Optional.of(payment));
         when(paymentMapper.toPaymentDto(payment)).thenReturn(expected);
 
         PaymentDto actual = paymentService.getById(ID_1L_CORRECT);
-
         assertEquals(expected, actual);
-
         verify(paymentRepository).findById(ID_1L_CORRECT);
         verify(paymentMapper).toPaymentDto(payment);
     }
@@ -103,9 +100,7 @@ public class PaymentServiceTest {
     public void getPayments_validAuthentication_returnPagePaymentDto() {
         User user = createUser1L();
         Payment payment = createPayment();
-
         PaymentDto dto = createPaymentDto();
-
         Page<Payment> payments = new PageImpl<>(List.of(payment), pageable, COUNT_CONTENT_1);
         Page<PaymentDto> expected = new PageImpl<>(List.of(dto), pageable, COUNT_CONTENT_1);
 
@@ -114,9 +109,7 @@ public class PaymentServiceTest {
         when(paymentMapper.toPaymentDtoPage(payments)).thenReturn(expected);
 
         Page<PaymentDto> actual = paymentService.getPayments(authentication, pageable);
-
         assertEquals(expected, actual);
-
         verify(customUserDetailsService).getUserIdFromAuthentication(authentication);
         verify(paymentRepository).findByRentalUserIdFetchRental(ID_1L_CORRECT, pageable);
         verify(paymentMapper).toPaymentDtoPage(payments);
@@ -134,9 +127,7 @@ public class PaymentServiceTest {
         rental.setUser(user);
         rental.setCar(car);
         BigDecimal amount = BigDecimal.valueOf(100.00);
-
         PaymentResponseDto expectedResponse = createPaymentResponseDto();
-
         Payment payment = new Payment();
         payment.setStatus(Payment.Status.PENDING);
         payment.setType(requestDto.paymentType());
@@ -148,22 +139,17 @@ public class PaymentServiceTest {
         Session mockSession = mock(Session.class);
         when(mockSession.getUrl()).thenReturn("https://example.com/success");
         when(mockSession.getId()).thenReturn("session_id");
-
         mockStatic(Session.class);
         when(Session.create(any(SessionCreateParams.class))).thenReturn(mockSession);
-
         when(customUserDetailsService.getUserIdFromAuthentication(authentication)).thenReturn(user.getId());
         when(rentalRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(rental));
         when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
         when(paymentMapper.toPaymentResponseDto(payment)).thenReturn(expectedResponse);
 
         PaymentResponseDto actualResponse = paymentService.createPaymentSession(authentication, requestDto);
-
         assertEquals(expectedResponse, actualResponse);
-
         verify(rentalRepository).findByIdAndUserId(1L, 1L);
         verify(paymentRepository).save(any(Payment.class));
         verify(paymentMapper).toPaymentResponseDto(payment);
     }
-
 }

@@ -1,1 +1,1 @@
-UPDATE cars SET model = 'updated' WHERE id = 10;
+UPDATE cars SET model = 'updated' WHERE id = 15;

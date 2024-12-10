@@ -50,9 +50,7 @@ public class CarServiceTest {
         when(carMapper.toCarDto(car)).thenReturn(expected);
 
         CarDto actual = carService.create(expected);
-
         assertEquals(expected, actual);
-
         verify(carMapper).toCar(expected);
         verify(carRepository).save(car);
         verify(carMapper).toCarDto(car);
@@ -70,9 +68,7 @@ public class CarServiceTest {
         when(carMapper.toCarDto(car)).thenReturn(expected);
 
         CarDto actual = carService.getById(ID_1L_CORRECT);
-
         assertEquals(expected, actual);
-
         verify(carRepository).findById(ID_1L_CORRECT);
         verify(carMapper).toCarDto(car);
     }
@@ -96,9 +92,7 @@ public class CarServiceTest {
             """)
     public void getAll_validAll_returnPageCarDto() {
         Car car = createCar1L();
-
         CarDto dto = createCarDto();
-
         Page<Car> cars = new PageImpl<>(List.of(car), pageable, COUNT_CONTENT_1);
         Page<CarDto> expected = new PageImpl<>(List.of(dto), pageable, COUNT_CONTENT_1);
 
@@ -106,9 +100,7 @@ public class CarServiceTest {
         when(carMapper.toCarDtoPage(cars)).thenReturn(expected);
 
         Page<CarDto> actual = carService.getAll(pageable);
-
         assertEquals(expected, actual);
-
         verify(carRepository).findAll(pageable);
         verify(carMapper).toCarDtoPage(cars);
     }
@@ -119,7 +111,6 @@ public class CarServiceTest {
             """)
     public void update_validCarDto_returnCarDto() {
         Car car = createCar1L();
-
         CarDto expected = createCarDto();
 
         when(carRepository.findById(ID_1L_CORRECT)).thenReturn(Optional.of(car));
@@ -127,9 +118,7 @@ public class CarServiceTest {
         when(carMapper.toCarDto(car)).thenReturn(expected);
 
         CarDto actual = carService.update(car.getId(), expected);
-
         assertEquals(expected, actual);
-
         verify(carRepository).findById(ID_1L_CORRECT);
         verify(carRepository).save(car);
         verify(carMapper).toCarDto(car);

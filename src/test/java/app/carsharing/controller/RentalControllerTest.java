@@ -5,10 +5,11 @@ import static app.carsharing.util.ConstantUtil.ADD_RENTAL_FOR_SET_RETURN_SQL;
 import static app.carsharing.util.ConstantUtil.ADD_USER_FOR_RENTAL_SQL;
 import static app.carsharing.util.ConstantUtil.DELETE_RENTAL_CAR_SQL;
 import static app.carsharing.util.ConstantUtil.DELETE_UPD_RENTAL_SQL;
-import static app.carsharing.util.ConstantUtil.DELETE_USER_SQL;
+import static app.carsharing.util.ConstantUtil.DELETE_USER_FOR_RENTAL_SQL;
 import static app.carsharing.util.ConstantUtil.ID_30L_CORRECT;
 import static app.carsharing.util.ConstantUtil.URL_RENTALS_WITH_ID;
 import static app.carsharing.util.EntityAndDtoMaker.createRentalDto30L;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testcontainers.shaded.org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 
 import app.carsharing.dto.RentalDto;
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -43,7 +45,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Sql(
         scripts = {DELETE_UPD_RENTAL_SQL,
                 DELETE_RENTAL_CAR_SQL,
-                DELETE_USER_SQL},
+                DELETE_USER_FOR_RENTAL_SQL},
         executionPhase = Sql.ExecutionPhase.AFTER_TEST_CLASS
 )
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -95,7 +97,7 @@ public class RentalControllerTest {
 
         RentalDto actual = objectMapper.readValue(
                 result.getResponse().getContentAsString(), RentalDto.class);
-
-        reflectionEquals(expected, actual);
+        assertTrue(reflectionEquals(expected.getActualReturnDate().toString(),
+                actual.getActualReturnDate().toString()));
     }
 }

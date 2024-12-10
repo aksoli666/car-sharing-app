@@ -68,11 +68,9 @@ public class RentalServiceTest {
             """)
     public void addRental_validAuthenticationAndDto() throws NotificationException {
         RentalAddRequestDto dto = createRentalAddRequestDto();
-
         Car car = createCar1L();
         User user = createUser1L();
         Rental rental = createRental();
-
         RentalAddResponseDto expected = createRentalAddResponseDto();
 
         when(carRepository.findById(car.getId())).thenReturn(Optional.of(car));
@@ -82,9 +80,7 @@ public class RentalServiceTest {
         when(rentalMapper.toRentalAddResponseDto(rental)).thenReturn(expected);
 
         RentalAddResponseDto actual = rentalService.addRental(authentication, dto);
-
         assertEquals(expected, actual);
-
         verify(carRepository).findById(car.getId());
         verify(customUserDetailsService).getUserFromAuthentication(authentication);
         verify(rentalMapper).toRental(dto);
@@ -113,9 +109,7 @@ public class RentalServiceTest {
     public void rentalHistory_validAuthenticationAndIsActive_returnPageRentalDto() {
         User user = createUser1L();
         Rental rental = createRental();
-
         RentalDto dto = createRentalDtoIsActive();
-
         Page<Rental> rentals = new PageImpl<>(List.of(rental), pageable, COUNT_CONTENT_1);
         Page<RentalDto> expected = new PageImpl<>(List.of(dto), pageable, COUNT_CONTENT_1);
 
@@ -125,9 +119,7 @@ public class RentalServiceTest {
         when(rentalMapper.toRentalDtoPage(rentals)).thenReturn(expected);
 
         Page<RentalDto> actual = rentalService.rentalHistory(authentication, IS_ACTIVE, pageable);
-
         assertEquals(expected, actual);
-
         verify(customUserDetailsService).getUserIdFromAuthentication(authentication);
         verify(rentalRepository).findByUserIdAndActualReturnDateIsNull(ID_1L_CORRECT, pageable);
         verify(rentalMapper).toRentalDtoPage(rentals);
@@ -141,9 +133,7 @@ public class RentalServiceTest {
     public void rentalHistory_validAuthenticationAndNotActive_returnPageRentalDto() {
         User user = createUser1L();
         Rental rental = createRental();
-
         RentalDto dto = createRentalDtoNotActive();
-
         Page<Rental> rentals = new PageImpl<>(List.of(rental), pageable, COUNT_CONTENT_1);
         Page<RentalDto> expected = new PageImpl<>(List.of(dto), pageable, COUNT_CONTENT_1);
 
@@ -153,9 +143,7 @@ public class RentalServiceTest {
         when(rentalMapper.toRentalDtoPage(rentals)).thenReturn(expected);
 
         Page<RentalDto> actual = rentalService.rentalHistory(authentication, NOT_ACTIVE, pageable);
-
         assertEquals(expected, actual);
-
         verify(customUserDetailsService).getUserIdFromAuthentication(authentication);
         verify(rentalRepository).findByUserIdAndActualReturnDateIsNotNull(ID_1L_CORRECT, pageable);
         verify(rentalMapper).toRentalDtoPage(rentals);
@@ -168,7 +156,6 @@ public class RentalServiceTest {
     public void getById_validAuthenticationAndId() {
         User user = createUser1L();
         Rental rental = createRental();
-
         RentalDto expected = createRentalDtoNotActive();
 
         when(customUserDetailsService.getUserIdFromAuthentication(authentication)).thenReturn(user.getId());
@@ -177,9 +164,7 @@ public class RentalServiceTest {
         when(rentalMapper.toRentalDto(rental)).thenReturn(expected);
 
         RentalDto actual = rentalService.getById(authentication, ID_1L_CORRECT);
-
         assertEquals(expected, actual);
-
         verify(customUserDetailsService).getUserIdFromAuthentication(authentication);
         verify(rentalRepository).findByIdAndUserId(ID_1L_CORRECT, ID_1L_CORRECT);
         verify(rentalMapper).toRentalDto(rental);
@@ -198,7 +183,6 @@ public class RentalServiceTest {
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> rentalService.getById(authentication, INCORRECT_ID));
-
         assertEquals("Rental not found by id: " + INCORRECT_ID, exception.getMessage());
     }
 
@@ -210,7 +194,6 @@ public class RentalServiceTest {
         Rental rental = createRental();
         rental.setActualReturnDate(null);
         rental.setCar(createCar1L());
-
         RentalDto expected = createRentalDtoNotActive();
 
         when(rentalRepository.findById(ID_1L_CORRECT)).thenReturn(Optional.of(rental));
@@ -219,9 +202,7 @@ public class RentalServiceTest {
 
         RentalDto actual = rentalService
                 .setActualReturnDate(ID_1L_CORRECT, LocalDate.now().plusDays(1));
-
         assertEquals(expected, actual);
-
         verify(rentalRepository).findById(ID_1L_CORRECT);
         verify(rentalRepository).save(rental);
         verify(rentalMapper).toRentalDto(rental);
@@ -240,7 +221,6 @@ public class RentalServiceTest {
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                 () -> rentalService.setActualReturnDate(INCORRECT_ID, LocalDate.now().plusDays(1)));
-
         assertEquals("Rental not found by id: " + INCORRECT_ID, exception.getMessage());
     }
 }

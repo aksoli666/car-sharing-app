@@ -58,7 +58,7 @@ public class EntityAndDtoMaker {
         return dto;
     }
 
-    public static CarDto createCarDto11L() {
+    public static CarDto createCarDto16L() {
         CarDto dto = new CarDto();
         dto.setModel("model11");
         dto.setBrand("brand11");
@@ -69,7 +69,7 @@ public class EntityAndDtoMaker {
         return dto;
     }
 
-    public static CarDto createCarDto12L() {
+    public static CarDto createCarDto17L() {
         CarDto dto = new CarDto();
         dto.setModel("model12");
         dto.setBrand("brand12");

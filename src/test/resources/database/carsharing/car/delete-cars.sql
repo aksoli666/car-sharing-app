@@ -1,1 +1,1 @@
-DELETE FROM cars WHERE id IN (11, 12);
+DELETE FROM cars WHERE id IN (16, 17);

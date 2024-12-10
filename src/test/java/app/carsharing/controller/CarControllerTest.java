@@ -1,21 +1,26 @@
 package app.carsharing.controller;
 
 import static app.carsharing.util.ConstantUtil.ADD_CARS_SQL;
+import static app.carsharing.util.ConstantUtil.ADD_CAR_FOR_UPDATE_SQL;
 import static app.carsharing.util.ConstantUtil.ADD_CAR_SQL;
 import static app.carsharing.util.ConstantUtil.COUNT_CONTENT_2;
+import static app.carsharing.util.ConstantUtil.DELETE_CARS_SQL;
+import static app.carsharing.util.ConstantUtil.DELETE_CAR_SQL;
 import static app.carsharing.util.ConstantUtil.DELETE_UPD_CAR_SQL;
 import static app.carsharing.util.ConstantUtil.ID_10L_CORRECT;
-import static app.carsharing.util.ConstantUtil.ID_11L_CORRECT;
+import static app.carsharing.util.ConstantUtil.ID_15L_CORRECT;
+import static app.carsharing.util.ConstantUtil.ID_16L_CORRECT;
 import static app.carsharing.util.ConstantUtil.UPDATE_CAR_SQL;
 import static app.carsharing.util.ConstantUtil.URL_CARS_WITHOUT_ID;
 import static app.carsharing.util.ConstantUtil.URL_CARS_WITH_ID;
 import static app.carsharing.util.ConstantUtil.pageable;
 import static app.carsharing.util.EntityAndDtoMaker.createCarDto10L;
-import static app.carsharing.util.EntityAndDtoMaker.createCarDto11L;
-import static app.carsharing.util.EntityAndDtoMaker.createCarDto12L;
+import static app.carsharing.util.EntityAndDtoMaker.createCarDto16L;
+import static app.carsharing.util.EntityAndDtoMaker.createCarDto17L;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testcontainers.shaded.org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 
+import app.carsharing.config.CustomPageImpl;
 import app.carsharing.dto.CarDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.sql.DataSource;
@@ -43,8 +48,12 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @Sql(
-        scripts = {ADD_CARS_SQL, ADD_CAR_SQL},
+        scripts = ADD_CARS_SQL,
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
+)
+@Sql(
+        scripts = DELETE_CARS_SQL,
+        executionPhase = Sql.ExecutionPhase.AFTER_TEST_CLASS
 )
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class CarControllerTest {
@@ -80,12 +89,19 @@ public class CarControllerTest {
         }
     }
 
+    @Sql(
+            scripts = ADD_CAR_SQL,
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+    )
+    @Sql(
+            scripts = DELETE_CAR_SQL,
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
+    )
     @WithMockUser(username = "manager", roles = "MANAGER")
     @Test
     @DisplayName("Create a new car")
     public void createCar_validDto_success() throws Exception {
         CarDto expected = createCarDto10L();
-
         String json = objectMapper.writeValueAsString(expected);
 
         MvcResult result = mockMvc.perform(
@@ -98,7 +114,6 @@ public class CarControllerTest {
 
         CarDto actual = objectMapper.readValue(
                 result.getResponse().getContentAsString(), CarDto.class);
-
         assertTrue(reflectionEquals(expected, actual));
     }
 
@@ -106,17 +121,16 @@ public class CarControllerTest {
     @Test
     @DisplayName("Get car by id")
     public void getCarById_validId_success() throws Exception {
-        CarDto expected = createCarDto10L();
+        CarDto expected = createCarDto16L();
 
         MvcResult result = mockMvc.perform(
-                        MockMvcRequestBuilders.get(URL_CARS_WITH_ID, ID_10L_CORRECT)
+                        MockMvcRequestBuilders.get(URL_CARS_WITH_ID, ID_16L_CORRECT)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
 
         CarDto actual = objectMapper.readValue(
                 result.getResponse().getContentAsString(), CarDto.class);
-
         assertTrue(reflectionEquals(expected, actual));
     }
 
@@ -124,9 +138,8 @@ public class CarControllerTest {
     @Test
     @DisplayName("Get all cars")
     public void getAll_givenCarsInCatalog_returnPageDtos() throws Exception {
-        CarDto first = createCarDto11L();
-        CarDto second = createCarDto12L();
-
+        CarDto first = createCarDto16L();
+        CarDto second = createCarDto17L();
         PageImpl<CarDto> expected = new PageImpl<>(List.of(first, second), pageable, COUNT_CONTENT_2);
 
         MvcResult result = mockMvc.perform(
@@ -135,13 +148,20 @@ public class CarControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
 
-        String actual = result.getResponse().getContentAsString();
-
-        reflectionEquals(expected, actual);
+        CustomPageImpl<CarDto> actual = objectMapper.readValue(result.getResponse().getContentAsString(),
+                objectMapper.getTypeFactory().constructParametricType(CustomPageImpl.class, CarDto.class));
+        assertTrue(reflectionEquals(expected.getContent().get(0).getModel(),
+                actual.getContent().get(0).getModel()));
+        assertTrue(reflectionEquals(expected.getContent().get(1).getModel(),
+                actual.getContent().get(1).getModel()));
     }
 
     @WithMockUser(username = "manager", roles = "MANAGER")
     @Test
+    @Sql(
+            scripts = ADD_CAR_FOR_UPDATE_SQL,
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+    )
     @Sql(
             scripts = UPDATE_CAR_SQL,
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
@@ -158,11 +178,10 @@ public class CarControllerTest {
         expected.setType("UNIVERSAL");
         expected.setInventory(5);
         expected.setDaileFee(BigDecimal.valueOf(50.99));
-
         String json = objectMapper.writeValueAsString(expected);
 
         MvcResult result = mockMvc.perform(
-                        MockMvcRequestBuilders.put(URL_CARS_WITH_ID, ID_10L_CORRECT)
+                        MockMvcRequestBuilders.put(URL_CARS_WITH_ID, ID_15L_CORRECT)
                                 .content(json)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -170,16 +189,16 @@ public class CarControllerTest {
 
         CarDto actual = objectMapper.readValue(
                 result.getResponse().getContentAsString(), CarDto.class);
-
         assertTrue(reflectionEquals(expected, actual));
     }
+
 
     @WithMockUser(username = "manager", roles = "MANAGER")
     @Test
     @DisplayName("Delete car by id")
     public void delete_validId_noContent() throws Exception {
         mockMvc.perform(
-                MockMvcRequestBuilders.delete(URL_CARS_WITH_ID, ID_11L_CORRECT)
+                MockMvcRequestBuilders.delete(URL_CARS_WITH_ID, ID_10L_CORRECT)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
     }

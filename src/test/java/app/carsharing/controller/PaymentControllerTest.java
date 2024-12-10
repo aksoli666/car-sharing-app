@@ -5,6 +5,10 @@ import static app.carsharing.util.ConstantUtil.ADD_PAYMENT_SQL;
 import static app.carsharing.util.ConstantUtil.ADD_RENTAL_FOR_PAYMENT_SQL;
 import static app.carsharing.util.ConstantUtil.ADD_USER_FOR_PAYMENT_SQL;
 import static app.carsharing.util.ConstantUtil.COUNT_CONTENT_1;
+import static app.carsharing.util.ConstantUtil.DELETE_CAR_FOR_PAYMENT_SQL;
+import static app.carsharing.util.ConstantUtil.DELETE_PAYMENT_SQL;
+import static app.carsharing.util.ConstantUtil.DELETE_RENTAL_FOR_PAYMENT_SQL;
+import static app.carsharing.util.ConstantUtil.DELETE_USER_FOR_PAYMENT_SQL;
 import static app.carsharing.util.ConstantUtil.ID_40L_CORRECT;
 import static app.carsharing.util.ConstantUtil.URL_PAYMENTS_WITHOUT_ID;
 import static app.carsharing.util.ConstantUtil.URL_PAYMENTS_WITH_ID;
@@ -13,6 +17,7 @@ import static app.carsharing.util.EntityAndDtoMaker.createPaymentDto40L;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testcontainers.shaded.org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 
+import app.carsharing.config.CustomPageImpl;
 import app.carsharing.dto.PaymentDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.sql.DataSource;
@@ -44,6 +49,13 @@ import org.springframework.web.context.WebApplicationContext;
                ADD_RENTAL_FOR_PAYMENT_SQL,
                ADD_PAYMENT_SQL},
        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
+)
+@Sql(
+        scripts = {DELETE_CAR_FOR_PAYMENT_SQL,
+                DELETE_USER_FOR_PAYMENT_SQL,
+                DELETE_RENTAL_FOR_PAYMENT_SQL,
+                DELETE_PAYMENT_SQL},
+        executionPhase = Sql.ExecutionPhase.AFTER_TEST_CLASS
 )
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class PaymentControllerTest {
@@ -93,7 +105,6 @@ public class PaymentControllerTest {
 
         PaymentDto actual = objectMapper.readValue(
                 result.getResponse().getContentAsString(), PaymentDto.class);
-
         assertTrue(reflectionEquals(expected, actual));
     }
 
@@ -111,8 +122,8 @@ public class PaymentControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
 
-        String actual = result.getResponse().getContentAsString();
-
-        reflectionEquals(expected, actual);
+        Object actual = objectMapper.readValue(result.getResponse().getContentAsString(),
+                objectMapper.getTypeFactory().constructParametricType(CustomPageImpl.class, PaymentDto.class));
+        assertTrue(reflectionEquals(expected, actual));
     }
 }
